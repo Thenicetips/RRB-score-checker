@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCS Score Calculator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+  body {
+  font-family: Arial, sans-serif;
+  margin: 10;
+  padding: 0;
+  background-color: #EAE7DC;
+  max-width:100%;
+}
+#p_subject_name{
+font-size: 1.3rem;
+            color: #6F0025;
+            margin-bottom: 10px;
+            border-bottom:2px solid green;
+            
+padding:20px;
+text-align: center;
+}
+.container {
+  max-width: 900px;
+  margin: 0 0;
+  padding: 2px;
+  justify-content: center;
+}
+
+header h1 {
+  text-align: center;
+  color: #4caf50;
+}
+
+.candidate-details table {
+  width: 100%;
+  
+  border-spacing: 0;
+  border-collapse: collapse;
+   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 30px;
+    justify-content: center;
+    background-color: #FFFFFF;
+}
+
+.candidate-details td {
+  padding: 5px 10px;
+  padding: 10px;
+      font-size: 1rem;
+}
+.candidate-details td:first-child {
+    font-weight: bold;
+    }
+.score-table .table {
+  width:calc(100%-20px);
+  margin:20px auto;
+  padding:10px;
+  border-collapse: collapse;
+  
+   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 30px;
+    background-color: #FFFFFF;
+}
+
+.score-table th, .score-table td {
+  border: none;
+  text-ali6gn: center;
+  padding: 15px 5px;
+  margin:2px;
+      font-size: 1rem;
+}
+tr , td {border: none;}
+
+.score-table thead th {
+  background-color: #4caf50;
+  color: white;
+}
+
+.total {
+  font-weight: bold;
+}
+
+.chart-container {
+  text-align: center;
+  margin-top: 20px;
+  
+}
+
+.chart img {
+  max-width: 100%;
+}
+
+canvas {
+	  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 30px;
+    background-color: #FFFFFF;
+	padding:10px;
+	margin:0 auto;display:block;
+}
+    
+.back-to-home {
+  display: inline-block;
+  margin-bottom: 10px;
+  color: #4caf50;
+  text-decoration: none;
+}
+
+@media (max-width: 768px) {
+  .candidate-details table, .score-table table {
+    font-size: 12px;
+  }
+
+  .chart .legend {
+    flex-direction: column;
+  }
+}
+     .button {
+            background-color: #FFFFFF;
+            color: black;
+            padding: 9px 10px;
+            font-size: 18px;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s, transform 0.2s;
+            margin-top: 20px;
+            justify-content: center;
+            width: 200px;
+        }
+        .button:hover {
+            background-color: #006f99;
+            transform: translateY(-3px);
+        }
+        .button:active {
+            transform: translateY(1px);
+        }
+  </style>
+</head>
+<body><h2 id="p_subject_name"> </h2>
+	<div class="container">
+    
+    
+    
+    
+    <div class="candidate-details">
+        <table class="table">
+        	{% for panel in main_info_panels %}
+            {% for row in panel.table_rows %}
+            <tr class="personal-details">
+                {% for cell in row %}
+                <td class="{{ cell|classify }}">{{ cell }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+            {% endfor %}
+        </table>
+    </div>
+    <div class="score-table">
+        <table class="table">
+            
+                <tr>
+                    <th>Section Name</th>
+                    <th style="color:green;"> &#x2713;</th>
+                    <th style="color:red;">&#x2718;</th>
+                    <th style="color:#6c757d;">Skip
+</th>
+                    <th>Accuracy</th>
+                    <th>Marks</th>
+                </tr>
+            
+     
+    {% for section in sections %}
+    <tr>
+        <td><strong>{{ section.name }}</strong></td>
+        <td><i style="color:green;">{{ section.correct }}</i></td>
+        <td><i style="color:red;">{{ section.wrong }}</i></td>
+        <td style="color:#6c757d;">{{ section.not_answered }}</td>
+ <td>
+    {% if section.correct + section.wrong == 0 %}
+        Not Answered
+    {% else %}
+        {% set accuracy = (section.correct * 100) / (section.correct + section.wrong) %}
+        {% if accuracy % 1 == 0 %}
+            {{ accuracy | int }} <b style="font-size:30;">%</b>
+        {% else %}
+            {{ accuracy | round(2) }} <b style="font-size:30;">%</b>
+        {% endif %}
+    {% endif %}
+</td>
+
+        <td>{% set marks = section.correct - (section.wrong / 3) %}
+{% if marks % 1 == 0 %}
+    {{ marks | int }}
+{% else %}
+    {{ marks | round(2) }}
+{% endif %}
+</td>
+    </tr>
+    {% endfor %}
+    <tr>
+        <td><strong>Total</strong></td>
+        <td><i style="color:green;">{{ overall.correct }}</i></td>
+        <td><i style="color:red;">{{ overall.wrong }}</i></td>
+        <td style="color:#6c757d;">{{ overall.not_answered }}</td>
+        
+         <td>
+    {% if overall.correct + overall.wrong == 0 %}
+        Not Answered
+    {% else %}
+        {% set accuracy = (overall.correct * 100) / (overall.correct + overall.wrong) %}
+        {% if accuracy % 1 == 0 %}
+            {{ accuracy | int }} <b style="font-size:30;">%</b>
+        {% else %}
+            {{ accuracy | round(2) }} <b style="font-size:30;">%</b>
+        {% endif %}
+    {% endif %}
+</td>
+
+        <td>
+{% set marks = overall.correct - (overall.wrong / 3) %}
+{% if marks % 1 == 0 %}
+    {{ marks | int }}
+{% else %}
+    {{ marks | round(2) }}
+{% endif %}
+</td>
+    </tr>
+    </tr>
+
+
+        </table>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <div class="chart-container">
+    <canvas id="radialChart"></canvas>
+    </div>
+    
+    <a href="/" class="back-to-home"><button class="button">← Back to Home</button></a>
+    </div>
+    <script>
+        const sectionData={correct:{{ overall.correct|safe }},wrong:{{ overall.wrong|safe }},notAnswered:{{ overall.not_answered|safe }}},ctx=document.getElementById('radialChart').getContext('2d');new Chart(ctx,{type:'doughnut',data:{labels:['Correct','Wrong','Not Answered'],datasets:[{data:[sectionData.correct,sectionData.wrong,sectionData.notAnswered],backgroundColor:['#28a745','#dc3545','#6c757d'],hoverBackgroundColor:['#218838','#c82333','#5a6268'],borderWidth:0}]},options:{plugins:{legend:{display:true,position:'bottom',labels:{font:{size:14}}}},responsive:true,cutout:'60%',animation:{animateScale:true,animateRotate:true}}});
+        
+        document.querySelectorAll('.personal-details').forEach(tr => {
+    if (tr.querySelector('td.application-photograph , td.exam-day')) {
+        tr.style.display = 'none';
+    }
+});
+function extractNextTdContent(pClass, outputElementId) {
+            const tds = document.querySelectorAll(`td.${pClass}`);
+            const outputElement = document.getElementById(outputElementId);
+
+            tds.forEach(td => {
+                const nextTd = td.nextElementSibling;  
+ if (nextTd) {
+
+                    outputElement.textContent += nextTd.textContent.trim() + '\n';
+                }
+            });
+        }
+
+
+        extractNextTdContent('subject', 'p_subject_name');  
+        
+
+    </script>
+    
+    
+    
+</body>
+</html>
