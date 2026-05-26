@@ -38,7 +38,7 @@ def index():
                 
                 # Extract strong tag text
                 strong_tag = main_info_div.find('strong')
-                #panel["strong_text"] = strong_tag.text.strip() if strong_tag else "No strong tag found!"
+                panel["strong_text"] = strong_tag.text.strip() if strong_tag else "No strong tag found!"
 
                 # Extract table rows
                 table = main_info_div.find('table')
